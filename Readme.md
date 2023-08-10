@@ -91,4 +91,15 @@ Create a new bill.
     "amount": 200
 }
 ```
+### GET /billing/search?category=ELECTRICITY
+Search bills by category. Replace ELECTRICITY by any category you want to search.
 
+Query Parameters:
+- **category (string, required): The Category of the bills.**
+
+### GET /billing/client/200
+
+Search bills by Client ID regardless if they are paid or pending
+
+Query Parameters:
+- **clientId (integer, required): The ID of the client.**
