@@ -9,8 +9,6 @@ The Basic Billing System API is a backend application built using .NET Core that
   - [Installation](#installation)
 - [Usage](#usage)
 - [Endpoints](#endpoints)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Getting Started
 
