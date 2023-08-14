@@ -23,15 +23,20 @@ namespace BasicBilling.API.Services
                 .ToList();
         }
 
+        private void ValidatePeriod(int year, int month)
+        {
+            if (year < 1 || year > 9999 || month < 1 || month > 12)
+            {
+                throw new ArgumentException("Invalid period format. Year must be between 1 and 9999, and month must be between 1 and 12.");
+            }
+        }
+
         public Bill CreateBill(BillCreationRequest request)
         {
             var year = request.Period / 100;
             var month = request.Period % 100;
 
-            if (year < 1 || year > 9999 || month < 1 || month > 12)
-            {
-                throw new ArgumentException("Invalid period format. Year must be between 1 and 9999, and month must be between 1 and 12.");
-            }
+            ValidatePeriod(year, month);
 
             var newBill = new Bill
             {
