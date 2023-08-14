@@ -13,8 +13,8 @@ namespace BasicBilling.API.Tests
     [TestFixture]
     public class BillingControllerTests
     {
-        private Mock<IBillingService> _mockBillingService;
-        private BillingController _controller;
+        private Mock<IBillingService>? _mockBillingService; // Nullable
+        private BillingController? _controller; // Nullable
 
         [SetUp]
         public void Setup()
@@ -26,11 +26,13 @@ namespace BasicBilling.API.Tests
         [Test]
         public void GetPendingBillsByClientId_NoPendingBills_ReturnsNotFound()
         {
+            // Arrange
             var clientId = 100;
-            _mockBillingService.Setup(service => service.GetPendingBillsByClientId(clientId))
-                               .Returns(new List<Bill>());
+            _mockBillingService!.Setup(service => service.GetPendingBillsByClientId(clientId))
+                                .Returns(new List<Bill>());
 
-            var result = _controller.GetPendingBillsByClientId(clientId);
+            // Act
+            var result = _controller!.GetPendingBillsByClientId(clientId);
 
             // Assert
             Assert.IsInstanceOf<NotFoundObjectResult>(result);
@@ -38,5 +40,6 @@ namespace BasicBilling.API.Tests
             Assert.AreEqual("No pending bills found for the specified client.", notFoundResult.Value);
         }
 
+        // You can write more test cases for different scenarios
     }
 }
