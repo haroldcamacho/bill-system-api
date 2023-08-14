@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using BasicBilling.API.Controllers;
-using BasicBilling.API.Data;
 using BasicBilling.API.Models;
 using BasicBilling.API.Models.Enums;
+using BasicBilling.API.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using NUnit.Framework;
 
@@ -14,27 +13,24 @@ namespace BasicBilling.API.Tests
     [TestFixture]
     public class BillingControllerTests
     {
+        private Mock<IBillingService> _mockBillingService;
+        private BillingController _controller;
+
+        [SetUp]
+        public void Setup()
+        {
+            _mockBillingService = new Mock<IBillingService>();
+            _controller = new BillingController(_mockBillingService.Object);
+        }
+
         [Test]
         public void GetPendingBillsByClientId_NoPendingBills_ReturnsNotFound()
         {
-            // Arrange
             var clientId = 100;
-            var bills = new List<Bill>().AsQueryable();
-            
-            var dbContextOptions = new DbContextOptionsBuilder<DataContext>()
-                .UseInMemoryDatabase(databaseName: "TestDatabase")
-                .Options;
-            
-            using var context = new DataContext(dbContextOptions);
-            context.Database.EnsureCreated();
-            
-            context.Bills.AddRange(bills);
-            context.SaveChanges();
+            _mockBillingService.Setup(service => service.GetPendingBillsByClientId(clientId))
+                               .Returns(new List<Bill>());
 
-            var controller = new BillingController(context);
-
-            // Act
-            var result = controller.GetPendingBillsByClientId(clientId);
+            var result = _controller.GetPendingBillsByClientId(clientId);
 
             // Assert
             Assert.IsInstanceOf<NotFoundObjectResult>(result);
@@ -42,6 +38,5 @@ namespace BasicBilling.API.Tests
             Assert.AreEqual("No pending bills found for the specified client.", notFoundResult.Value);
         }
 
-        // You can write more test cases for different scenarios
     }
 }
