@@ -21,7 +21,6 @@ namespace BasicBilling.API.Data
             modelBuilder.Entity<Bill>().ToTable("Bills");
             modelBuilder.Entity<Client>().ToTable("Clients");
 
-            // Configure foreign key relationship if needed
             modelBuilder.Entity<Bill>()
                 .HasOne(b => b.Client)
                 .WithMany(c => c.Bills)

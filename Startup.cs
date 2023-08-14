@@ -21,11 +21,10 @@ namespace BasicBilling.API
         {
             services.AddDbContext<DataContext>(options =>
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection"),
-                    sqliteOptions  => sqliteOptions .MigrationsAssembly("BasicBilling.API"))); // Specify the assembly name containing migrations
+                    sqliteOptions  => sqliteOptions .MigrationsAssembly("BasicBilling.API")));
 
             services.AddControllers();
 
-            // Add CORS policy if needed
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAllOrigins", builder =>
@@ -43,7 +42,7 @@ namespace BasicBilling.API
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error"); // Configure your error handling path
+                app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
 

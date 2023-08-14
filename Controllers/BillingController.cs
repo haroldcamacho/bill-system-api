@@ -52,7 +52,7 @@ namespace BasicBilling.API.Controllers
                 Category = request.Category,
                 MonthYear = new DateTime(year, month, 1),
                 State = BillState.Pending,
-                Amount = request.Amount // Set the amount property
+                Amount = request.Amount 
             };
 
             _context.Bills.Add(newBill);
@@ -69,7 +69,7 @@ namespace BasicBilling.API.Controllers
                 .FirstOrDefault(b => b.ClientId == request.ClientId &&
                                     b.MonthYear.Year == request.Period / 100 &&
                                     b.MonthYear.Month == request.Period % 100 &&
-                                    b.Category == request.Category && // Use Category instead of ServiceType
+                                    b.Category == request.Category && 
                                     b.State == BillState.Pending);
 
             if (billToPay == null)
