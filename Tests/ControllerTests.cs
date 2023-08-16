@@ -26,20 +26,17 @@ namespace BasicBilling.API.Tests
         [Test]
         public void GetPendingBillsByClientId_NoPendingBills_ReturnsNotFound()
         {
-            // Arrange
             var clientId = 100;
             _mockBillingService!.Setup(service => service.GetPendingBillsByClientId(clientId))
                                 .Returns(new List<Bill>());
-
-            // Act
+                                
             var result = _controller!.GetPendingBillsByClientId(clientId);
 
-            // Assert
+
             Assert.IsInstanceOf<NotFoundObjectResult>(result);
             var notFoundResult = (NotFoundObjectResult)result;
             Assert.AreEqual("No pending bills found for the specified client.", notFoundResult.Value);
         }
 
-        // You can write more test cases for different scenarios
     }
 }

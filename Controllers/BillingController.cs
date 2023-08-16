@@ -47,8 +47,8 @@ namespace BasicBilling.API.Controllers
         public IActionResult ProcessPayment([FromBody] BillPaymentRequest request)
         {
             var paymentProcessed = _billingService.ProcessPayment(request);
-
             if (!paymentProcessed)
+
             {
                 return BadRequest("No pending bill found for the specified criteria.");
             }
