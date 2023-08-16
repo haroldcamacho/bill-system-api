@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using BasicBilling.API.Data;
+using BasicBilling.API.Services;
 
 namespace BasicBilling.API
 {
@@ -21,7 +22,7 @@ namespace BasicBilling.API
         {
             services.AddDbContext<DataContext>(options =>
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection"),
-                    sqliteOptions  => sqliteOptions .MigrationsAssembly("BasicBilling.API")));
+                    sqliteOptions => sqliteOptions.MigrationsAssembly("BasicBilling.API")));
 
             services.AddControllers();
 
@@ -32,6 +33,8 @@ namespace BasicBilling.API
                     builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
                 });
             });
+
+            services.AddScoped<IBillingService, BillingService>(); 
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DataContext dbContext)

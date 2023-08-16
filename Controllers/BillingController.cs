@@ -1,10 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using BasicBilling.API.Data;
+using BasicBilling.API.Services;
 using BasicBilling.API.Models;
 using System;
-using System.Linq;
-using BasicBilling.API.Models.Enums;
-
 
 namespace BasicBilling.API.Controllers
 {
@@ -12,19 +9,17 @@ namespace BasicBilling.API.Controllers
     [ApiController]
     public class BillingController : ControllerBase
     {
-        private readonly DataContext _context;
+        private readonly IBillingService _billingService;
 
-        public BillingController(DataContext context)
+        public BillingController(IBillingService billingService)
         {
-            _context = context;
+            _billingService = billingService;
         }
 
         [HttpGet("pending")]
         public IActionResult GetPendingBillsByClientId(int clientId)
         {
-            var pendingBills = _context.Bills
-                .Where(b => b.ClientId == clientId && b.State == BillState.Pending)
-                .ToList();
+            var pendingBills = _billingService.GetPendingBillsByClientId(clientId);
 
             if (pendingBills == null || pendingBills.Count == 0)
             {
@@ -34,51 +29,29 @@ namespace BasicBilling.API.Controllers
             return Ok(pendingBills);
         }
 
-
         [HttpPost("bills")]
         public IActionResult CreateBill([FromBody] BillCreationRequest request)
         {
-            var year = request.Period / 100;
-            var month = request.Period % 100;
-
-            if (year < 1 || year > 9999 || month < 1 || month > 12)
+            try
             {
-                return BadRequest("Invalid period format. Year must be between 1 and 9999, and month must be between 1 and 12.");
+                var newBill = _billingService.CreateBill(request);
+                return CreatedAtAction(nameof(CreateBill), new { id = newBill.Id }, newBill);
             }
-
-            var newBill = new Bill
+            catch (ArgumentException ex)
             {
-                ClientId = request.ClientId,
-                Category = request.Category,
-                MonthYear = new DateTime(year, month, 1),
-                State = BillState.Pending,
-                Amount = request.Amount 
-            };
-
-            _context.Bills.Add(newBill);
-            _context.SaveChanges();
-
-            return CreatedAtAction(nameof(CreateBill), new { id = newBill.Id }, newBill);
+                return BadRequest(ex.Message);
+            }
         }
-
 
         [HttpPost("pay")]
         public IActionResult ProcessPayment([FromBody] BillPaymentRequest request)
         {
-            var billToPay = _context.Bills
-                .FirstOrDefault(b => b.ClientId == request.ClientId &&
-                                    b.MonthYear.Year == request.Period / 100 &&
-                                    b.MonthYear.Month == request.Period % 100 &&
-                                    b.Category == request.Category && 
-                                    b.State == BillState.Pending);
+            var paymentProcessed = _billingService.ProcessPayment(request);
+            if (!paymentProcessed)
 
-            if (billToPay == null)
             {
                 return BadRequest("No pending bill found for the specified criteria.");
             }
-
-            billToPay.State = BillState.Paid;
-            _context.SaveChanges();
 
             return Ok("Payment processed successfully.");
         }
@@ -86,26 +59,21 @@ namespace BasicBilling.API.Controllers
         [HttpGet("search")]
         public IActionResult SearchBillsByCategory(string category)
         {
-            var bills = _context.Bills
-                .Where(b => b.Category == category)
-                .ToList();
-
+            var bills = _billingService.SearchBillsByCategory(category);
             return Ok(bills);
         }
-        
+
         [HttpGet("client/{clientId}")]
         public IActionResult GetBillsByClientId(int clientId)
         {
-        var bills = _context.Bills
-        .Where(b => b.ClientId == clientId)
-        .ToList();
-
-        return Ok(bills);
+            var bills = _billingService.GetBillsByClientId(clientId);
+            return Ok(bills);
         }
+
         [HttpGet("{id}")]
         public IActionResult GetBillById(int id)
         {
-            var bill = _context.Bills.FirstOrDefault(b => b.Id == id);
+            var bill = _billingService.GetBillById(id);
 
             if (bill == null)
             {
@@ -114,20 +82,12 @@ namespace BasicBilling.API.Controllers
 
             return Ok(bill);
         }
+
         [HttpPost("clients")]
         public IActionResult CreateClient([FromBody] ClientCreationRequest request)
         {
-            var newClient = new Client
-            {
-                Id = request.ClientId,
-                Name = request.Name
-            };
-
-            _context.Clients.Add(newClient);
-            _context.SaveChanges();
-
+            var newClient = _billingService.CreateClient(request);
             return CreatedAtAction(nameof(CreateClient), new { id = newClient.Id }, newClient);
         }
-
     }
 }
