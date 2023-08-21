@@ -30,11 +30,14 @@ To run the Basic Billing System API, you need to have the following software ins
 3. Build and run the application:
     ```bash
     dotnet restore
-    dotnet run
+    dotnet run --project BasicBilling.API
 4. Verify the API is running:
 
     The API should now be running locally on http://localhost:5000.
 
+5. To run tests:
+    ```bash
+    dotnet test
 
 # Usage
 
