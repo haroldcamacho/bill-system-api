@@ -221,6 +221,24 @@ namespace BasicBilling.API.Tests
             var badRequestResult = (BadRequestObjectResult)result;
             Assert.AreEqual("Client not found.", badRequestResult.Value);
         }
+        [Test]
+        public void GetAllClients_ReturnsListOfClients()
+        {
+            var clients = new List<Client>
+            {
+                new Client { Id = 1, Name = "Client 1" },
+                new Client { Id = 2, Name = "Client 2" },
+                new Client { Id = 3, Name = "Client 3" }
+            };
 
+            _mockBillingService!.Setup(service => service.GetAllClients())
+                .Returns(clients);
+
+            var result = _controller!.GetAllClients();
+
+            Assert.IsInstanceOf<OkObjectResult>(result);
+            var okResult = (OkObjectResult)result;
+            Assert.AreEqual(clients, okResult.Value);
+        }
     }
 }

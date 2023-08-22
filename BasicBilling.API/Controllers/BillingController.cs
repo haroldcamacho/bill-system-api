@@ -89,5 +89,13 @@ namespace BasicBilling.API.Controllers
             var newClient = _billingService.CreateClient(request);
             return CreatedAtAction(nameof(CreateClient), new { id = newClient.Id }, newClient);
         }
+
+        [HttpGet("clients")]
+        public IActionResult GetAllClients()
+        {
+            var clients = _billingService.GetAllClients();
+            return Ok(clients);
+        }
+
     }
 }

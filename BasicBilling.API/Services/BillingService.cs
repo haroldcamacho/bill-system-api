@@ -105,5 +105,10 @@ namespace BasicBilling.API.Services
 
             return newClient;
         }
+        public List<Client> GetAllClients()
+        {
+            return _context.Clients.ToList();
+        }
+
     }
 }
