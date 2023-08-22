@@ -104,6 +104,12 @@ namespace BasicBilling.API.Controllers
             return Ok(categories);
         }
 
+        [HttpGet("unique-pending-dates")]
+        public IActionResult GetUniquePendingBillDates()
+        {
+            var uniqueDates = _billingService.GetUniquePendingBillDates();
+            return Ok(uniqueDates);
+        }
 
     }
 }

@@ -117,6 +117,14 @@ namespace BasicBilling.API.Services
                 .Distinct()
                 .ToList();
         }
+        public List<int> GetUniquePendingBillDates()
+        {
+            return _context.Bills
+                .Where(b => b.State == BillState.Pending)
+                .Select(b => b.MonthYear.Year * 100 + b.MonthYear.Month)
+                .Distinct()
+                .ToList();
+        }
 
 
     }

@@ -14,6 +14,7 @@ namespace BasicBilling.API.Services
         Client CreateClient(ClientCreationRequest request);
         List<Client> GetAllClients();
         List<string> GetUniqueCategories();
+        List<int> GetUniquePendingBillDates();
 
     }
 }
