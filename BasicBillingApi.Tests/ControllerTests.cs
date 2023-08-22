@@ -99,5 +99,128 @@ namespace BasicBilling.API.Tests
             Assert.AreEqual("Payment processed successfully.", okResult.Value);
         }
 
+        [Test]
+        public void ProcessPayment_NonExistingBill_ReturnsBadRequest()
+        {
+            var request = new BillPaymentRequest
+            {
+                ClientId = 101,
+                Period = 202312,
+                Category = "Electricity"
+            };
+            _mockBillingService.Setup(service => service.ProcessPayment(request))
+                .Returns(false);
+
+            var result = _controller.ProcessPayment(request);
+
+            Assert.IsInstanceOf<BadRequestObjectResult>(result);
+            var badRequestResult = (BadRequestObjectResult)result;
+            Assert.AreEqual("No pending bill found for the specified criteria.", badRequestResult.Value);
+        }
+
+        [Test]
+        public void CreateBill_ValidRequest_ReturnsCreated()
+        {
+            var request = new BillCreationRequest
+            {
+                ClientId = 101,
+                Category = "Electricity",
+                Period = 202312,
+                Amount = 100.0m
+            };
+            var newBill = new Bill
+            {
+                Id = 1,
+                ClientId = request.ClientId,
+                Category = request.Category,
+                MonthYear = new DateTime(2023, 12, 1),
+                State = BillState.Pending,
+                Amount = request.Amount
+            };
+            _mockBillingService.Setup(service => service.CreateBill(request))
+                               .Returns(newBill);
+
+            var result = _controller.CreateBill(request);
+
+            Assert.IsInstanceOf<CreatedAtActionResult>(result);
+            var createdResult = (CreatedAtActionResult)result;
+            Assert.AreEqual(nameof(BillingController.CreateBill), createdResult.ActionName);
+            Assert.AreEqual(newBill.Id, createdResult.RouteValues["id"]);
+            Assert.AreEqual(newBill, createdResult.Value);
+        }
+
+        [Test]
+        public void SearchBillsByCategory_ValidCategory_ReturnsOkWithBills()
+        {
+            var category = "Electricity";
+            var bills = new List<Bill>
+            {
+                new Bill { Id = 1, ClientId = 101, Category = category, State = BillState.Pending, Amount = 100.0m },
+                new Bill { Id = 2, ClientId = 102, Category = category, State = BillState.Pending, Amount = 150.0m }
+            };
+            _mockBillingService.Setup(service => service.SearchBillsByCategory(category))
+                .Returns(bills);
+
+            var result = _controller.SearchBillsByCategory(category);
+
+            Assert.IsInstanceOf<OkObjectResult>(result);
+            var okResult = (OkObjectResult)result;
+            Assert.AreEqual(bills, okResult.Value);
+        }
+
+        [Test]
+        public void SearchBillsByCategory_NonExistingCategory_ReturnsEmptyList()
+        {
+            var nonExistingCategory = "NonExistingCategory";
+            _mockBillingService.Setup(service => service.SearchBillsByCategory(nonExistingCategory))
+                .Returns(new List<Bill>());
+
+            var result = _controller.SearchBillsByCategory(nonExistingCategory);
+
+            Assert.IsInstanceOf<OkObjectResult>(result);
+            var okResult = (OkObjectResult)result;
+            Assert.IsEmpty((List<Bill>)okResult.Value);
+        }
+
+        [Test]
+        public void GetBillsByClientId_ReturnsValidPayload()
+        {
+            var clientId = 100;
+            var bills = new List<Bill>
+            {
+                new Bill { Id = 1, ClientId = clientId, Category = "Electricity", State = BillState.Pending },
+                new Bill { Id = 2, ClientId = clientId, Category = "Water", State = BillState.Paid },
+            };
+            _mockBillingService.Setup(service => service.GetBillsByClientId(clientId))
+                .Returns(bills);
+
+            var result = _controller.GetBillsByClientId(clientId);
+
+            Assert.IsInstanceOf<OkObjectResult>(result);
+            var okResult = (OkObjectResult)result;
+            Assert.AreEqual(bills, okResult.Value);
+        }
+        [Test]
+        public void CreateBill_NonExistingClient_ReturnsBadRequest()
+        {
+            var clientId = 999; 
+            var request = new BillCreationRequest
+            {
+                ClientId = clientId,
+                Category = "Electricity",
+                Period = 202311, 
+                Amount = 50.0m
+            };
+
+            _mockBillingService.Setup(service => service.CreateBill(request))
+                .Throws(new ArgumentException("Client not found."));
+
+            var result = _controller!.CreateBill(request);
+
+            Assert.IsInstanceOf<BadRequestObjectResult>(result);
+            var badRequestResult = (BadRequestObjectResult)result;
+            Assert.AreEqual("Client not found.", badRequestResult.Value);
+        }
+
     }
 }
