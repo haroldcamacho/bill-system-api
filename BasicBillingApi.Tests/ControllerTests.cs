@@ -240,5 +240,26 @@ namespace BasicBilling.API.Tests
             var okResult = (OkObjectResult)result;
             Assert.AreEqual(clients, okResult.Value);
         }
+
+        [Test]
+        public void GetDistinctCategories_ReturnsDistinctCategories()
+        {
+            var categories = new List<string>
+            {
+                "Electricity",
+                "Water",
+                "Gas"
+            };
+
+            _mockBillingService!.Setup(service => service.GetUniqueCategories())
+                .Returns(categories);
+
+            var result = _controller!.GetUniqueCategories();
+
+            Assert.IsInstanceOf<OkObjectResult>(result);
+            var okResult = (OkObjectResult)result;
+            Assert.AreEqual(categories, okResult.Value);
+        }
+
     }
 }

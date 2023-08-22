@@ -13,6 +13,7 @@ namespace BasicBilling.API.Services
         Bill GetBillById(int id);
         Client CreateClient(ClientCreationRequest request);
         List<Client> GetAllClients();
+        List<string> GetUniqueCategories();
 
     }
 }

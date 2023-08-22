@@ -110,5 +110,14 @@ namespace BasicBilling.API.Services
             return _context.Clients.ToList();
         }
 
+        public List<string> GetUniqueCategories()
+        {
+            return _context.Bills
+                .Select(b => b.Category)
+                .Distinct()
+                .ToList();
+        }
+
+
     }
 }

@@ -97,5 +97,13 @@ namespace BasicBilling.API.Controllers
             return Ok(clients);
         }
 
+        [HttpGet("categories")]
+        public IActionResult GetUniqueCategories()
+        {
+            var categories = _billingService.GetUniqueCategories();
+            return Ok(categories);
+        }
+
+
     }
 }
