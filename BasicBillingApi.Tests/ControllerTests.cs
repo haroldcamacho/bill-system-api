@@ -24,7 +24,7 @@ namespace BasicBilling.API.Tests
         }
 
         [Test]
-        public void GetPendingBillsByClientId_NoPendingBills_ReturnsNotFound()
+        public void GetPendingBillsByClientIdNoPendingBillsReturnsNotFound()
         {
             var clientId = 100;
             _mockBillingService!.Setup(service => service.GetPendingBillsByClientId(clientId))
@@ -38,7 +38,7 @@ namespace BasicBilling.API.Tests
             Assert.AreEqual("No pending bills found for the specified client.", notFoundResult.Value);
         }
         [Test]
-        public void GetGetPendingBillsByClientId_ReturnsValidPayload()
+        public void GetPendingBillsByClientIdReturnsValidPayload()
         {
             var clientId = 100;
             var category = "Electricity";
@@ -55,5 +55,49 @@ namespace BasicBilling.API.Tests
             var okResult = (OkObjectResult)result;
             Assert.AreEqual(pendingBills, okResult.Value);
         }
+
+         [Test]
+        public void CreateClient_ValidRequest_ReturnsCreated()
+        {
+            var request = new ClientCreationRequest
+            {
+                ClientId = 101,
+                Name = "Test Client"
+            };
+            var newClient = new Client
+            {
+                Id = request.ClientId,
+                Name = request.Name
+            };
+            _mockBillingService.Setup(service => service.CreateClient(request))
+                               .Returns(newClient);
+            var result = _controller!.CreateClient(request);
+
+            Assert.IsInstanceOf<CreatedAtActionResult>(result);
+            var createdResult = (CreatedAtActionResult)result;
+            Assert.AreEqual(nameof(BillingController.CreateClient), createdResult.ActionName);
+            Assert.AreEqual(newClient.Id, createdResult.RouteValues["id"]);
+            Assert.AreEqual(newClient, createdResult.Value);
+        }
+
+        [Test]
+        public void ProcessPayment_ExistingBill_ReturnsOk()
+        {
+            var request = new BillPaymentRequest
+            {
+                ClientId = 101,
+                Period = 202312,
+                Category = "Electricity"
+            };
+            _mockBillingService.Setup(service => service.ProcessPayment(request))
+                .Returns(true);
+
+            var result = _controller.ProcessPayment(request);
+
+            Assert.IsInstanceOf<OkObjectResult>(result);
+            var okResult = (OkObjectResult)result;
+            Assert.AreEqual("Payment processed successfully.", okResult.Value);
+        }
+
     }
 }
